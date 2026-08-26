@@ -82,7 +82,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
               <Link href="/auth/login">
                 <Button variant="secondary" className="px-6 py-2 text-sm bg-white">LOGIN</Button>
               </Link>
-              <Link href="/auth/register">
+              <Link href="/auth/login">
                 <Button className="px-6 py-2 text-sm bg-blue-700">REGISTER</Button>
               </Link>
             </div>
