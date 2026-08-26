@@ -1,6 +1,7 @@
 import { StatCard } from "@/features/admin/components/StatCard";
 import { ActiveEventsTable } from "@/features/admin/components/ActiveEventTable";
 import { Button } from "@/features/global/components/Button";
+import Link from "next/link";
 
 export default function AdminDashboardPage() {
   return (
@@ -15,7 +16,9 @@ export default function AdminDashboardPage() {
       <section>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-3xl font-black tracking-tight">Active Events</h2>
-          <Button>+ CREATE EVENT</Button>
+          <Link href="/admin/dashboard/create">
+            <Button>+ CREATE EVENT</Button>
+          </Link>
         </div>
         <ActiveEventsTable />
       </section>

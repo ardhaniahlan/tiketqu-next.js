@@ -13,14 +13,21 @@ export default async function HomePage() {
         <h1 className="text-3xl font-black tracking-tighter">
           <span className="text-blue-600">🎫</span> TIKETQU
         </h1>
-        
+
         <div className="flex gap-4 items-center">
           {session ? (
             <>
               <span className="font-bold border-2 border-black px-4 py-2 bg-white shadow-[4px_4px_0_0_#000]">
                 Halo, {session.user?.name}!
               </span>
-              <LogoutButton/>
+
+              {session.user?.role === "admin" && (
+                <a href="/admin/dashboard">
+                  <Button type="button">⚙️ Admin Panel</Button>
+                </a>
+              )}
+
+              <LogoutButton />
             </>
           ) : (
             <Link href="/auth/login">
