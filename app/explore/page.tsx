@@ -123,7 +123,7 @@ export default async function ExplorePage() {
                         {event.price === 0 ? "GRATIS" : formatRupiah(event.price)}
                       </span>
                       
-                      <Link href={`/events/${event.id}`}>
+                      <Link href={`/explore/${event.id}`}>
                         <button className="bg-red-600 text-white text-xs font-black uppercase px-3 py-2 border-2 border-black shadow-[2px_2px_0_0_#000] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
                           LIHAT DETAIL
                         </button>
