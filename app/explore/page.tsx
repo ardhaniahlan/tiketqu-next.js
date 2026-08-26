@@ -4,21 +4,57 @@ import { db } from "@/db";
 import { events } from "@/db/schema";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
-import { desc } from "drizzle-orm";
+import { and, asc, count, desc, gte, ilike } from "drizzle-orm";
 import Link from "next/link";
+import { Suspense } from "react";
+import { EventCard } from "@/features/explore/components/EventCard";
+import { SearchFilter } from "@/features/explore/components/SearchFilter";
 
-export default async function ExplorePage() {
+const PAGE_SIZE = 9;
+
+interface ExplorePageProps {
+  searchParams: Promise<{
+    query?: string;
+    date?: string;
+    sort?: "asc" | "desc";
+    page?: string;
+  }>;
+}
+
+export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   const session = await getServerSession(authOptions);
+  const { query, date, sort = "desc", page: pageParam } = await searchParams;
 
-  const eventList = await db.select().from(events).orderBy(desc(events.createdAt));
+  const page = Math.max(1, Number(pageParam) || 1);
+  const itemsToShow = page * PAGE_SIZE;
 
-  const formatRupiah = (price: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
+  const conditions = [];
+  if (query) {
+    conditions.push(ilike(events.title, `%${query}%`));
+  }
+  if (date) {
+    conditions.push(gte(events.date, new Date(date)));
+  }
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [eventList, totalResult] = await Promise.all([
+    db
+      .select()
+      .from(events)
+      .where(whereClause)
+      .orderBy(sort === "asc" ? asc(events.date) : desc(events.date))
+      .limit(itemsToShow),
+    db.select({ total: count() }).from(events).where(whereClause),
+  ]);
+
+  const totalCount = totalResult[0]?.total ?? 0;
+  const hasMore = itemsToShow < totalCount;
+
+  const nextPageParams = new URLSearchParams();
+  if (query) nextPageParams.set("query", query);
+  if (date) nextPageParams.set("date", date);
+  if (sort) nextPageParams.set("sort", sort);
+  nextPageParams.set("page", String(page + 1));
 
   return (
     <div className="min-h-screen bg-[#f4f4f5] font-sans flex flex-col">
@@ -31,7 +67,7 @@ export default async function ExplorePage() {
           <Link href="/" className="font-bold uppercase text-sm border-b-4 border-red-600 pb-1 hidden md:block">
             Explore
           </Link>
-          
+
           {session ? (
             <>
               {session.user?.role === "admin" && (
@@ -55,27 +91,9 @@ export default async function ExplorePage() {
       </header>
 
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-8 space-y-8">
-        
-        <div className="bg-[#fcd34d] border-4 border-black p-4 md:p-5 shadow-[6px_6px_0_0_#000] flex flex-col md:flex-row gap-4 items-end">
-          <div className="flex-1 w-full flex flex-col gap-1">
-            <label className="text-xs font-black uppercase">Cari Event</label>
-            <input 
-              type="text" 
-              placeholder="Nama event atau artis..." 
-              className="border-4 border-black p-3 font-medium outline-none focus:bg-yellow-50" 
-            />
-          </div>
-          <div className="flex-1 w-full flex flex-col gap-1">
-            <label className="text-xs font-black uppercase">Tanggal</label>
-            <input 
-              type="date" 
-              className="border-4 border-black p-3 font-medium outline-none focus:bg-yellow-50" 
-            />
-          </div>
-          <Button className="bg-blue-700 text-white px-8 py-3 w-full md:w-auto text-base">
-            SEARCH
-          </Button>
-        </div>
+        <Suspense fallback={null}>
+          <SearchFilter />
+        </Suspense>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {eventList.length === 0 ? (
@@ -83,64 +101,17 @@ export default async function ExplorePage() {
               Belum ada event yang tersedia saat ini.
             </div>
           ) : (
-            eventList.map((event) => {
-              const persentaseLaku = (event.quota - event.quotaRemaining) / event.quota;
-              let badge = null;
-              if (persentaseLaku > 0.8 && event.quotaRemaining > 0) {
-                badge = <div className="absolute top-2 right-2 bg-red-600 text-white font-black text-xs px-2 py-1 border-2 border-black z-10">ALMOST SOLD OUT</div>;
-              } else if (event.quotaRemaining === 0) {
-                badge = <div className="absolute top-2 right-2 bg-gray-800 text-white font-black text-xs px-2 py-1 border-2 border-black z-10">SOLD OUT</div>;
-              }
-
-              return (
-                <div key={event.id} className="bg-white border-4 border-black flex flex-col shadow-[6px_6px_0_0_#000] relative group">
-                  {badge}
-                  
-                  <div className="h-48 border-b-4 border-black bg-blue-100 overflow-hidden relative">
-                    <img 
-                      src={event.imageUrl || "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&q=80&w=800&h=400"} 
-                      alt={event.title}
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-
-                  <div className="p-4 flex flex-col flex-1 bg-white">
-                    <h3 className="font-black text-lg md:text-xl uppercase mb-3 line-clamp-2 leading-tight">
-                      {event.title}
-                    </h3>
-                    
-                    <div className="flex flex-col gap-2 mb-6 text-sm font-semibold text-gray-600">
-                      <span className="flex items-center gap-2">
-                        📅 {event.date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
-                      </span>
-                      <span className="flex items-center gap-2 line-clamp-1">
-                        📍 {event.location}
-                      </span>
-                    </div>
-
-                    <div className="mt-auto flex items-center justify-between pt-4">
-                      <span className="font-black text-blue-700 text-lg uppercase tracking-tighter">
-                        {event.price === 0 ? "GRATIS" : formatRupiah(event.price)}
-                      </span>
-                      
-                      <Link href={`/explore/${event.id}`}>
-                        <button className="bg-red-600 text-white text-xs font-black uppercase px-3 py-2 border-2 border-black shadow-[2px_2px_0_0_#000] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
-                          LIHAT DETAIL
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              );
-            })
+            eventList.map((event) => <EventCard key={event.id} event={event} />)
           )}
         </div>
 
-        {eventList.length > 0 && (
+        {hasMore && (
           <div className="flex justify-center pt-8">
-            <Button variant="secondary" className="px-8 py-3 bg-white font-black text-sm uppercase">
-              LOAD MORE EVENTS
-            </Button>
+            <Link href={`/explore?${nextPageParams.toString()}`} scroll={false}>
+              <Button variant="secondary" className="px-8 py-3 bg-white font-black text-sm uppercase">
+                LOAD MORE EVENTS
+              </Button>
+            </Link>
           </div>
         )}
       </main>
