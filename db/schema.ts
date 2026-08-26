@@ -22,6 +22,7 @@ export const events = pgTable("events", {
   quotaRemaining: integer("quota_remaining").notNull(),
   date: timestamp("date").notNull(),
   location: text("location").notNull(),
+  imageUrl: text("image_url").default(""),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

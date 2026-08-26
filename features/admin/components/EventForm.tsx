@@ -14,6 +14,7 @@ type EventItem = {
   price: number;
   quota: number;
   description: string;
+  imageUrl?: string;
 };
 
 export const EventForm = ({ initialData }: { initialData?: EventItem }) => {
@@ -71,6 +72,17 @@ export const EventForm = ({ initialData }: { initialData?: EventItem }) => {
               defaultValue={initialData?.title || ""}
               className="border-2 border-black p-2 text-sm font-medium outline-none focus:bg-yellow-100 transition-colors shadow-[2px_2px_0_0_#000]" 
               required 
+            />
+          </div>
+          
+          <div className="flex flex-col gap-1">
+            <label className="font-bold uppercase text-xs">URL Poster Event</label>
+            <input 
+              type="text" 
+              name="imageUrl"
+              defaultValue={initialData?.imageUrl || ""}
+              className="border-2 border-black p-2 text-sm font-medium outline-none focus:bg-yellow-100 transition-colors shadow-[2px_2px_0_0_#000]" 
+              placeholder="Contoh: https://imgur.com/gambar.jpg" 
             />
           </div>
 

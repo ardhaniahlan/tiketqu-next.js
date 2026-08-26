@@ -24,6 +24,11 @@ export function AdminSidebar() {
             📊 ANALYTICS
           </Button>
         </Link>
+        <Link href="/explore">
+          <Button variant="secondary" className="w-full text-left justify-start px-4 py-3 text-sm">
+            🎫 BACK TO EVENT
+          </Button>
+        </Link>
       </nav>
     </aside>
   );

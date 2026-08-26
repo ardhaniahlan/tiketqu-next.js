@@ -36,6 +36,7 @@ export async function createEventAction(formData: FormData): Promise<ActionResul
       quota: validatedData.data.quota,
       quotaRemaining: validatedData.data.quota,
       description: validatedData.data.description || "",
+      imageUrl: validatedData.data.imageUrl || ""
     });
 
     revalidatePath("/admin/dashboard");
@@ -66,6 +67,7 @@ export async function updateEventAction(id: string, formData: FormData): Promise
       price: Number(formData.get("price")),
       quota: Number(formData.get("quota")),
       description: formData.get("description") as string,
+      imageUrl: formData.get("imageUrl") as string,
     };
 
     const validatedData = createEventSchema.safeParse(rawData);
@@ -97,6 +99,7 @@ export async function updateEventAction(id: string, formData: FormData): Promise
       quota: kuotaBaru,
       quotaRemaining: kuotaBaru - tiketTerjual, 
       description: validatedData.data.description || "",
+      imageUrl: validatedData.data.imageUrl || ""
     }).where(eq(events.id, id));
 
     revalidatePath("/admin/dashboard");
