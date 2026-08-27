@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { orders, events, transactions, ticketItems } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import nodemailer from "nodemailer";
 
 export async function POST(req: Request) {
   try {
@@ -38,29 +39,70 @@ export async function POST(req: Request) {
         .where(eq(orders.id, order_id));
 
       if (finalStatus === "paid") {
-        const currentOrder = await db.select().from(orders).where(eq(orders.id, order_id)).limit(1);
+  const currentOrder = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.id, order_id))
+    .limit(1);
 
-        if (currentOrder.length > 0) {
-          const { eventId, quantity } = currentOrder[0];
+  if (currentOrder.length > 0) {
+    const { eventId, quantity, buyerName, buyerEmail } = currentOrder[0];
 
-          await db.update(events).set({ quotaRemaining: sql`${events.quotaRemaining} - ${quantity}` }).where(eq(events.id, eventId));
+    await db
+      .update(events)
+      .set({
+        quotaRemaining: sql`${events.quotaRemaining} - ${quantity}`,
+      })
+      .where(eq(events.id, eventId));
 
-          await db.insert(transactions).values({ 
-            orderId: order_id,
-            midtransTransactionId: transaction_id,
-            paymentType: payment_type,
-            grossAmount: Math.round(Number(gross_amount)),
-            status: finalStatus,
-          });
+    await db.insert(transactions).values({
+      orderId: order_id,
+      midtransTransactionId: transaction_id,
+      paymentType: payment_type,
+      grossAmount: Math.round(Number(gross_amount)),
+      status: finalStatus,
+    });
 
-          const ticketsToInsert = Array.from({ length: quantity }).map(() => ({
-            orderId: order_id,
-            status: "active"
-          }));
+    const ticketsToInsert = Array.from({ length: quantity }).map(() => ({
+      orderId: order_id,
+      status: "active",
+    }));
 
-          await db.insert(ticketItems).values(ticketsToInsert);
-        }
-      }
+    await db.insert(ticketItems).values(ticketsToInsert);
+
+    try {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER, 
+          pass: process.env.EMAIL_PASS, 
+        },
+      });
+
+      await transporter.sendMail({
+        from: '"TiketQu Admin" <${process.env.EMAIL_USER}>', 
+        to: buyerEmail,
+        subject: `[E-Ticket] Pembayaran Berhasil - ${buyerName}`,
+        html: `
+          <div style="font-family: sans-serif; padding: 20px; border: 4px solid #000;">
+            <h1 style="background: #2563eb; color: #fff; padding: 10px; text-align: center;">TIKETQU E-TICKET</h1>
+            <h2>Halo ${buyerName}, Pembayaran Berhasil! 🎉</h2>
+            <p>Terima kasih telah memesan <strong>${quantity} tiket</strong>.</p>
+            <p>Anda dapat melihat dan mengunduh QR Code tiket Anda secara langsung melalui link berikut:</p>
+            
+            <a href="https://revivable-cardiac-destiny.ngrok-free.dev/history/${order_id}" 
+               style="display: inline-block; background: #facc15; color: #000; padding: 12px 20px; font-weight: bold; text-decoration: none; border: 2px solid #000;">
+               Buka E-Ticket Saya 🎟️
+            </a>
+          </div>
+        `,
+      });
+      console.log("✅ Email sukses terkirim ke:", buyerEmail);
+    } catch (emailError) {
+      console.error("❌ Gagal mengirim email:", emailError);
+    }
+  }
+}
     }
 
     return NextResponse.json(
