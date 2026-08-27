@@ -2,9 +2,9 @@ import { db } from "@/db";
 import { orders, events, ticketItems } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { Button } from "@/features/global/components/Button";
 import QRCode from "react-qr-code";
+import { Button } from "@/features/global/components/Button";
+import BackButton from "@/features/global/components/BackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +15,7 @@ interface TicketPageProps {
 export default async function TicketPage({ params }: TicketPageProps) {
   const { id } = await params;
 
+  // 1. Ambil data order & event
   const ticketData = await db
     .select({
       orderId: orders.id,
@@ -29,8 +30,15 @@ export default async function TicketPage({ params }: TicketPageProps) {
     .leftJoin(events, eq(orders.eventId, events.id))
     .where(eq(orders.id, id))
     .limit(1);
+
   const ticket = ticketData[0];
 
+  // Validasi jika tiket tidak ada atau belum dibayar
+  if (!ticket || ticket.status !== "paid") {
+    redirect("/history");
+  }
+
+  // 2. Ambil data individual tiket QR code
   const myIndividualTickets = await db
     .select({ ticketId: ticketItems.id, status: ticketItems.status })
     .from(ticketItems)
@@ -39,12 +47,8 @@ export default async function TicketPage({ params }: TicketPageProps) {
   const isEventPassed =
     ticket.eventDate && new Date() > new Date(ticket.eventDate);
 
-  if (!ticket || ticket.status !== "paid") {
-    redirect("/history");
-  }
-
   return (
-    <div className="min-h-screen bg-[#f4f4f5] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#f4f4f5] flex items-center justify-center p-4 font-sans">
       <div className="max-w-md w-full flex flex-col gap-6">
         <div className="bg-white border-4 border-black shadow-[8px_8px_0_0_#000] overflow-hidden">
           <div className="bg-blue-600 text-white p-6 border-b-4 border-black text-center font-black">
@@ -90,7 +94,9 @@ export default async function TicketPage({ params }: TicketPageProps) {
           </div>
 
           <div
-            className={`bg-white border-4 border-black shadow-[8px_8px_0_0_#000] overflow-hidden relative ${isEventPassed ? "opacity-80 grayscale-50" : ""}`}
+            className={`bg-white border-4 border-black shadow-[8px_8px_0_0_#000] overflow-hidden relative ${
+              isEventPassed ? "opacity-80 grayscale-50" : ""
+            }`}
           >
             {isEventPassed && (
               <div className="absolute top-1/2 left-0 w-full bg-red-600 text-white font-black text-3xl py-4 text-center -rotate-12 uppercase border-y-4 border-black z-10 shadow-xl">
@@ -99,7 +105,9 @@ export default async function TicketPage({ params }: TicketPageProps) {
             )}
 
             <div
-              className={`${isEventPassed ? "bg-gray-600" : "bg-blue-600"} text-white p-6 border-b-4 border-black text-center font-black`}
+              className={`${
+                isEventPassed ? "bg-gray-600" : "bg-blue-600"
+              } text-white p-6 border-b-4 border-black text-center font-black`}
             >
               <h1 className="text-2xl uppercase tracking-widest">
                 {isEventPassed ? "HISTORY TICKET" : "E-TICKET"}
@@ -108,13 +116,18 @@ export default async function TicketPage({ params }: TicketPageProps) {
 
             <div className="bg-gray-100 p-6 flex flex-col items-center justify-center border-t-4 border-black">
               {myIndividualTickets.map((t) => (
-                <div key={t.ticketId} className="mb-6">
+                <div
+                  key={t.ticketId}
+                  className="mb-6 flex flex-col items-center"
+                >
                   <p className="text-sm font-bold text-gray-600 mb-2">
                     TICKET #{t.ticketId.slice(-4)}
                   </p>
 
                   <div
-                    className={`bg-white p-4 border-4 border-black ${isEventPassed ? "blur-sm" : ""}`}
+                    className={`bg-white p-4 border-4 border-black inline-block ${
+                      isEventPassed ? "blur-sm" : ""
+                    }`}
                   >
                     <QRCode value={t.ticketId} size={150} />
                   </div>
@@ -139,11 +152,7 @@ export default async function TicketPage({ params }: TicketPageProps) {
           </div>
         </div>
 
-        <Link href="/history">
-          <Button className="w-full py-4 text-sm bg-white text-black hover:bg-gray-200 border-2 border-black">
-            KEMBALI KE RIWAYAT
-          </Button>
-        </Link>
+        <BackButton/>
       </div>
     </div>
   );
