@@ -4,13 +4,19 @@ import { Button } from "@/features/global/components/Button";
 import Link from "next/link";
 import { db } from "@/db";
 import { events, orders, transactions } from "@/db/schema";
-import { desc, eq, sum } from "drizzle-orm";
+import { desc, eq, gte, sum } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
+  const today = new Date();
+
   const [eventData, revenueResult, ticketsSoldResult, recentOrders] = await Promise.all([
-    db.select().from(events).orderBy(desc(events.createdAt)),
+    db
+      .select()
+      .from(events)
+      .where(gte(events.date, today)) 
+      .orderBy(desc(events.createdAt)),
     
     db.select({ total: sum(transactions.grossAmount) }).from(transactions).where(eq(transactions.status, "paid")),
     
