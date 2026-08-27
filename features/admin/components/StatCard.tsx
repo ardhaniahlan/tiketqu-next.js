@@ -11,7 +11,7 @@ interface StatCardProps {
 export function StatCard({ title, value, icon, variant = "default" }: StatCardProps) {
   return (
     <Card className={cn(
-      "flex flex-col justify-between",
+      "flex flex-col justify-between overflow-hidden",
       variant === "blue" && "bg-blue-600 text-white"
     )}>
       <div className="flex justify-between items-center mb-4">
@@ -25,7 +25,10 @@ export function StatCard({ title, value, icon, variant = "default" }: StatCardPr
           </div>
         )}
       </div>
-      <p className="text-5xl font-black font-mono">{value}</p>
+      
+      <p className="text-2xl sm:text-3xl md:text-4xl font-black font-mono tracking-tight wrap-break-words">
+        {value}
+      </p>
     </Card>
   );
 }
