@@ -5,21 +5,17 @@ import { desc, eq, sum } from "drizzle-orm";
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage() {
-  // Mengambil data analitik mendalam dari database secara paralel
   const [totalRevenueResult, totalTicketsResult, eventPerformances] = await Promise.all([
-    // A. Total keseluruhan pendapatan lunas
     db
       .select({ total: sum(transactions.grossAmount) })
       .from(transactions)
       .where(eq(transactions.status, "paid")),
 
-    // B. Total tiket terjual keseluruhan
     db
       .select({ total: sum(orders.quantity) })
       .from(orders)
       .where(eq(orders.status, "paid")),
 
-    // C. Performa Penjualan per Masing-Masing Event
     db
       .select({
         eventId: events.id,
@@ -39,7 +35,6 @@ export default async function AnalyticsPage() {
   return (
     <div className="space-y-6 p-4 md:p-6 max-w-6xl mx-auto font-sans">
       
-      {/* HEADER HALAMAN */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b-4 border-black pb-4">
         <div>
           <h1 className="text-3xl font-black uppercase tracking-tight">Analitik & Laporan</h1>
@@ -47,7 +42,6 @@ export default async function AnalyticsPage() {
         </div>
       </div>
 
-      {/* KARTU RINGKASAN UTAMA */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-green-300 border-4 border-black p-6 shadow-[6px_6px_0_0_#000]">
           <h3 className="font-bold uppercase text-sm mb-2">Total Pendapatan Bersih</h3>
@@ -64,7 +58,6 @@ export default async function AnalyticsPage() {
         </div>
       </div>
 
-      {/* TABEL PERFORMA PER EVENT */}
       <div className="bg-white border-4 border-black shadow-[6px_6px_0_0_#000] overflow-hidden mt-8">
         <div className="bg-gray-100 p-4 border-b-4 border-black">
           <h2 className="font-black text-lg uppercase">Rincian Performa per Event</h2>
