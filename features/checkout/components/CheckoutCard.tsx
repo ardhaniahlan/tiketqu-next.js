@@ -8,13 +8,14 @@ interface CheckoutCardProps {
   eventId: string;
   price: number;
   quotaRemaining: number;
+  isSoldOut: boolean;
+  isEventPassed: boolean;
 }
 
-export function CheckoutCard({ eventId, price, quotaRemaining }: CheckoutCardProps) {
+export function CheckoutCard({ eventId, price, quotaRemaining, isSoldOut, isEventPassed }: CheckoutCardProps) {
   const [quantity, setQuantity] = useState(1);
   const router = useRouter(); 
   
-  const isSoldOut = quotaRemaining === 0;
   const maxQty = Math.min(4, quotaRemaining);
 
   const increaseQty = () => {
@@ -34,7 +35,15 @@ export function CheckoutCard({ eventId, price, quotaRemaining }: CheckoutCardPro
     }).format(angka);
   };
 
+  const isNotReady = isSoldOut || isEventPassed;
+  const buttonText = isEventPassed 
+    ? "EVENT SELESAI" 
+    : isSoldOut 
+      ? "TIKET HABIS" 
+      : "BELI SEKARANG 🎟️";
+
   const handleCheckout = () => {
+    if (isNotReady) return;
     router.push(`/explore/${eventId}/checkout?eventId=${eventId}&qty=${quantity}`);
   };
 
@@ -96,10 +105,12 @@ export function CheckoutCard({ eventId, price, quotaRemaining }: CheckoutCardPro
 
       <Button 
         onClick={handleCheckout}
-        disabled={isSoldOut}
-        className={`w-full py-4 text-xl mt-2 ${isSoldOut ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"}`}
+        disabled={isNotReady}
+        className={`w-full py-4 text-xl mt-2 ${
+          isNotReady ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
+        }`}
       >
-        {isSoldOut ? "TIKET HABIS" : "BELI SEKARANG 🎟️"}
+        {buttonText}
       </Button>
 
       {!isSoldOut && (

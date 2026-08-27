@@ -20,18 +20,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
   const sisaTiket = event.quotaRemaining;
   const isSoldOut = sisaTiket === 0;
 
-  const formatRupiah = new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(event.price);
-
   const formatTanggal = event.date.toLocaleDateString("id-ID", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
   });
+
+  const isEventPassed = event.date && new Date() > new Date(event.date);
 
   return (
     <div className="min-h-screen bg-[#f4f4f5] font-sans pb-20">
@@ -53,9 +49,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
           <div className="w-full lg:w-2/3 flex flex-col gap-6">
             
             <div className="border-4 border-black shadow-[6px_6px_0_0_#000] bg-white overflow-hidden aspect-video relative">
-              {isSoldOut && (
+              {(isSoldOut || isEventPassed) && (
                 <div className="absolute top-4 right-4 bg-black text-white font-black text-xl px-4 py-2 border-2 border-white z-10 rotate-12">
-                  SOLD OUT
+                  {isSoldOut ? "SOLD OUT" : "SELESAI"}
                 </div>
               )}
               <img 
@@ -96,6 +92,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
               eventId={event.id}
               price={event.price}
               quotaRemaining={event.quotaRemaining}
+              isSoldOut={isSoldOut}
+              isEventPassed={isEventPassed}
             />
 
           </div>
