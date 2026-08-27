@@ -15,7 +15,6 @@ interface TicketPageProps {
 export default async function TicketPage({ params }: TicketPageProps) {
   const { id } = await params;
 
-  // 1. Ambil data order & event
   const ticketData = await db
     .select({
       orderId: orders.id,
@@ -33,12 +32,10 @@ export default async function TicketPage({ params }: TicketPageProps) {
 
   const ticket = ticketData[0];
 
-  // Validasi jika tiket tidak ada atau belum dibayar
   if (!ticket || ticket.status !== "paid") {
     redirect("/history");
   }
 
-  // 2. Ambil data individual tiket QR code
   const myIndividualTickets = await db
     .select({ ticketId: ticketItems.id, status: ticketItems.status })
     .from(ticketItems)

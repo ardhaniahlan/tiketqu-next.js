@@ -21,7 +21,7 @@ export default async function HistoryPage({
 
   const resolvedSearchParams = await searchParams;
   const currentPage = Number(resolvedSearchParams.page) || 1;
-  const pageSize = 2; 
+  const pageSize = 5; 
   const offset = (currentPage - 1) * pageSize;
 
   const [userHistory, totalCountResult] = await Promise.all([
