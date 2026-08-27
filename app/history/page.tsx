@@ -70,7 +70,6 @@ export default async function HistoryPage() {
                 </div>
 
                 <div className="flex flex-col items-start md:items-end gap-2 w-full md:w-auto mt-4 md:mt-0">
-                  {/* Badge Status */}
                   <span className={`px-4 py-1 text-sm font-bold border-2 border-black ${
                     item.status === 'paid' ? 'bg-green-400' :
                     item.status === 'pending' ? 'bg-yellow-300' :
@@ -81,9 +80,8 @@ export default async function HistoryPage() {
                      '❌ GAGAL/KADALUARSA'}
                   </span>
                   
-                  {/* TOMBOL AKSI BERFUNGSI! */}
                   {item.status === 'paid' && (
-                    <Link href={`/user/ticket/${item.orderId}`} className="w-full md:w-auto">
+                    <Link href={`/history/${item.orderId}`} className="w-full md:w-auto">
                       <Button className="w-full md:w-auto bg-blue-600 text-white text-xs">
                         🎟️ LIHAT E-TICKET
                       </Button>
@@ -91,7 +89,6 @@ export default async function HistoryPage() {
                   )}
                   
                   {item.status === 'pending' && (
-                    // GUNAKAN KOMPONEN CLIENT DI SINI
                     <ContinuePaymentButton 
                       snapToken={item.snapToken} 
                       orderId={item.orderId} 
