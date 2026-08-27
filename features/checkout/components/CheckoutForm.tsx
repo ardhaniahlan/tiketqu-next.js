@@ -16,7 +16,6 @@ interface CheckoutFormProps {
   eventId: string;
   quantity: number;
   totalPrice: number;
-  // TAMBAHAN: Menerima data dari session
   userName?: string | null;
   userEmail?: string | null;
 }
@@ -111,7 +110,7 @@ export default function CheckoutForm({
           type="text"
           name="name"
           required
-          defaultValue={userName || ""} // <-- Menjadi nilai saran (bisa dihapus/diganti user)
+          defaultValue={userName || ""} 
           placeholder="Contoh: Budi Santoso"
           className="border-2 border-black p-2 text-sm font-medium outline-none focus:bg-yellow-100 shadow-[2px_2px_0_0_#000]"
         />
@@ -125,7 +124,7 @@ export default function CheckoutForm({
           type="email"
           name="email"
           required
-          defaultValue={userEmail || ""} // <-- Menjadi nilai saran (bisa dihapus/diganti user)
+          defaultValue={userEmail || ""} 
           placeholder="budi@example.com"
           className="border-2 border-black p-2 text-sm font-medium outline-none focus:bg-yellow-100 shadow-[2px_2px_0_0_#000]"
         />
@@ -137,7 +136,7 @@ export default function CheckoutForm({
           type="tel"
           name="phone"
           required
-          autoFocus // <-- Kursor langsung diarahkan ke sini
+          autoFocus 
           placeholder="081234567890"
           className="border-2 border-black p-2 text-sm font-medium outline-none focus:bg-yellow-100 shadow-[2px_2px_0_0_#000]"
         />

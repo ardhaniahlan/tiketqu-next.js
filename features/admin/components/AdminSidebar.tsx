@@ -18,7 +18,6 @@ export function AdminSidebar() {
 
   return (
     <>
-      {/* 1. TOMBOL HAMBURGER MOBILE (Hanya muncul di HP) */}
       <div className="md:hidden bg-white border-b-4 border-black p-4 flex justify-between items-center sticky top-0 z-40 shadow-[0_4px_0_0_#000]">
         <div className="font-black text-xl tracking-tighter">
           <span className="text-blue-600">🎫</span> TIKETQU
@@ -31,7 +30,6 @@ export function AdminSidebar() {
         </button>
       </div>
 
-      {/* 2. SIDEBAR UTAMA */}
       <aside
         className={`
           fixed inset-0 z-50 md:static md:z-auto w-full md:w-64 border-r-4 border-black bg-white min-h-screen p-6 flex flex-col gap-6 
@@ -39,12 +37,10 @@ export function AdminSidebar() {
           ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
       >
-        {/* Header khusus di dalam sidebar saat mode mobile */}
         <div className="flex justify-between items-center border-b-4 border-black pb-4">
           <div className="font-black text-2xl tracking-tighter">
             <span className="text-blue-600">🎫</span> TIKETQU ADMIN
           </div>
-          {/* Tombol silang khusus di dalam drawer mobile */}
           <button
             onClick={() => setIsOpen(false)}
             className="md:hidden border-2 border-black px-3 py-1 bg-red-400 font-black text-xs shadow-[2px_2px_0_0_#000]"
@@ -64,7 +60,7 @@ export function AdminSidebar() {
                 onClick={() => setIsOpen(false)}
               >
                 <Button 
-                  variant={isActive ? "default" : "secondary"}
+                  variant={pathname === item.href ? "primary" : "secondary"}
                   className={`w-full text-left justify-start px-4 py-3 text-sm ${
                     isActive ? "bg-yellow-300 ring-2 ring-black" : ""
                   }`}

@@ -38,7 +38,7 @@ export default async function AllOrdersPage({
   }
 
   if (statusQuery && statusQuery !== "ALL") {
-    conditions.push(eq(orders.status, statusQuery.toLowerCase()));
+    conditions.push(eq(orders.status, statusQuery.toLowerCase() as "pending" | "paid" | "failed" | "expired"));
   }
 
   const finalWhere = conditions.length > 0 ? and(...conditions) : undefined;
