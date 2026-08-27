@@ -75,6 +75,12 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
                   <Button type="button" variant="secondary" className="px-4 py-2 text-sm">⚙️ ADMIN</Button>
                 </Link>
               )}
+
+              <Link href="/history">
+                <Button variant="secondary" className="px-4 py-2 text-sm bg-yellow-300 hover:bg-yellow-400 text-black">
+                  🎫 TIKET SAYA
+                </Button>
+              </Link>
               <LogoutButton />
             </>
           ) : (

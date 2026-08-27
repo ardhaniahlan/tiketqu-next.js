@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { orders } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { orders, events, transactions } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { order_id, transaction_status } = body;
+
+    const {
+      order_id,
+      transaction_status,
+      transaction_id,
+      payment_type,
+      gross_amount,
+    } = body;
 
     let finalStatus: "pending" | "paid" | "failed" | "expired" = "pending";
 
@@ -29,10 +36,37 @@ export async function POST(req: Request) {
         .update(orders)
         .set({ status: finalStatus })
         .where(eq(orders.id, order_id));
+
+      if (finalStatus === "paid") {
+        const currentOrder = await db
+          .select()
+          .from(orders)
+          .where(eq(orders.id, order_id))
+          .limit(1);
+
+        if (currentOrder.length > 0) {
+          const { eventId, quantity } = currentOrder[0];
+
+          await db
+            .update(events)
+            .set({
+              quotaRemaining: sql`${events.quotaRemaining} - ${quantity}`,
+            })
+            .where(eq(events.id, eventId));
+
+          await db.insert(transactions).values({
+            orderId: order_id,
+            midtransTransactionId: transaction_id,
+            paymentType: payment_type,
+            grossAmount: Math.round(Number(gross_amount)),
+            status: finalStatus,
+          });
+        }
+      }
     }
 
     return NextResponse.json(
-      { status: "success", message: "Webhook received" },
+      { status: "success", message: "Webhook received & processed" },
       { status: 200 },
     );
   } catch (error) {
