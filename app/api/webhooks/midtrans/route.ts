@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { orders, events, transactions } from "@/db/schema";
+import { orders, events, transactions, ticketItems } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 
 export async function POST(req: Request) {
@@ -38,29 +38,27 @@ export async function POST(req: Request) {
         .where(eq(orders.id, order_id));
 
       if (finalStatus === "paid") {
-        const currentOrder = await db
-          .select()
-          .from(orders)
-          .where(eq(orders.id, order_id))
-          .limit(1);
+        const currentOrder = await db.select().from(orders).where(eq(orders.id, order_id)).limit(1);
 
         if (currentOrder.length > 0) {
           const { eventId, quantity } = currentOrder[0];
 
-          await db
-            .update(events)
-            .set({
-              quotaRemaining: sql`${events.quotaRemaining} - ${quantity}`,
-            })
-            .where(eq(events.id, eventId));
+          await db.update(events).set({ quotaRemaining: sql`${events.quotaRemaining} - ${quantity}` }).where(eq(events.id, eventId));
 
-          await db.insert(transactions).values({
+          await db.insert(transactions).values({ 
             orderId: order_id,
             midtransTransactionId: transaction_id,
             paymentType: payment_type,
             grossAmount: Math.round(Number(gross_amount)),
             status: finalStatus,
           });
+
+          const ticketsToInsert = Array.from({ length: quantity }).map(() => ({
+            orderId: order_id,
+            status: "active"
+          }));
+
+          await db.insert(ticketItems).values(ticketsToInsert);
         }
       }
     }

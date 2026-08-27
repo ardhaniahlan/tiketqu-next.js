@@ -101,3 +101,15 @@ export const verificationTokens = pgTable(
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );
+
+export const ticketItems = pgTable("ticket_items", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  
+  orderId: text("order_id")
+    .notNull()
+    .references(() => orders.id, { onDelete: "cascade" }), 
+    
+  status: text("status").default("active").notNull(),
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
