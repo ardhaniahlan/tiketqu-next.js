@@ -60,7 +60,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
     <div className="min-h-screen bg-[#f4f4f5] font-sans flex flex-col">
       <header className="flex justify-between items-center p-4 md:p-6 bg-white border-b-4 border-black">
         <h1 className="text-2xl md:text-3xl font-black tracking-tighter uppercase">
-          <span className="text-blue-700">🎫</span> TIKETKU
+          <span className="text-blue-700">🎫</span> TIKETQU
         </h1>
 
         <div className="flex gap-3 md:gap-6 items-center">
@@ -123,8 +123,8 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
       </main>
 
       <footer className="border-t-4 border-black p-6 bg-white mt-12 flex flex-col md:flex-row justify-between items-center gap-4">
-        <h2 className="font-black text-xl tracking-tighter">TIKETKU</h2>
-        <p className="font-bold text-xs text-gray-500">© 2024 TiketKu. All rights reserved.</p>
+        <h2 className="font-black text-xl tracking-tighter">TIKETQU</h2>
+        <p className="font-bold text-xs text-gray-500">© 2026 TiketQu. All rights reserved.</p>
       </footer>
     </div>
   );

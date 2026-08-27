@@ -18,6 +18,11 @@ export async function createEventAction(formData: FormData): Promise<ActionResul
     price: Number(formData.get("price")),
     quota: Number(formData.get("quota")),
     description: formData.get("description") as string,
+    imageUrl: formData.get("imageUrl") as string,
+    category: formData.get("category") as string,
+    organizer: formData.get("organizer") as string,
+    time: formData.get("time") as string,
+    locationMapUrl: formData.get("locationMapUrl") as string,
   };
 
   const validatedData = createEventSchema.safeParse(rawData);
@@ -36,7 +41,11 @@ export async function createEventAction(formData: FormData): Promise<ActionResul
       quota: validatedData.data.quota,
       quotaRemaining: validatedData.data.quota,
       description: validatedData.data.description || "",
-      imageUrl: validatedData.data.imageUrl || ""
+      imageUrl: validatedData.data.imageUrl || "",
+      category: validatedData.data.category || "",
+      organizer: validatedData.data.organizer || "",
+      time: validatedData.data.time || "",
+      locationMapUrl: validatedData.data.locationMapUrl || "",
     });
 
     revalidatePath("/admin/dashboard");
@@ -68,6 +77,10 @@ export async function updateEventAction(id: string, formData: FormData): Promise
       quota: Number(formData.get("quota")),
       description: formData.get("description") as string,
       imageUrl: formData.get("imageUrl") as string,
+      category: formData.get("category") as string,
+      organizer: formData.get("organizer") as string,
+      time: formData.get("time") as string,
+      locationMapUrl: formData.get("locationMapUrl") as string,
     };
 
     const validatedData = createEventSchema.safeParse(rawData);
@@ -99,7 +112,11 @@ export async function updateEventAction(id: string, formData: FormData): Promise
       quota: kuotaBaru,
       quotaRemaining: kuotaBaru - tiketTerjual, 
       description: validatedData.data.description || "",
-      imageUrl: validatedData.data.imageUrl || ""
+      imageUrl: validatedData.data.imageUrl || "",
+      category: validatedData.data.category || "",
+      organizer: validatedData.data.organizer || "",
+      time: validatedData.data.time || "",
+      locationMapUrl: validatedData.data.locationMapUrl || "",
     }).where(eq(events.id, id));
 
     revalidatePath("/admin/dashboard");

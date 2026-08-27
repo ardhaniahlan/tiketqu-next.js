@@ -8,4 +8,8 @@ export const createEventSchema = z.object({
   quota: z.number().min(1, "Kuota minimal 1"),
   description: z.string().optional(),
   imageUrl: z.string().optional(),
+  category: z.string().optional(),
+  organizer: z.string().optional(),
+  time: z.string().optional(),
+  locationMapUrl: z.string().optional(),
 });
